@@ -168,7 +168,7 @@ if st.button("Summarize Content", key="summarize"):
                     if filtered_content:
                         summary = summarize_text(filtered_content)
                         st.success(f"Summary of {url}:")
-                        st.write(summary)
+                        st.text_area("Summary", summary, height=200, disabled=True)
                     else:
                         st.warning(f"No relevant content found in {url} for the query: {search_query}")
                 except Exception as e:
@@ -191,7 +191,7 @@ if st.button("Summarize Content", key="summarize"):
                             chain = load_summarize_chain(llm, chain_type="stuff", prompt=prompt)
                             summary = chain.run([doc])
                             st.success(f"Summary of {url}:")
-                            st.write(summary)
+                            st.text_area("Summary", summary, height=200, disabled=True)
                         else:
                             st.warning(f"No relevant content found on {url} for the query: {search_query}")
                 except Exception as e:
@@ -207,7 +207,7 @@ if st.button("Summarize Content", key="summarize"):
                     filtered_content = filter_content(raw_text, search_query)
                     if filtered_content:
                         st.success(f"Summary of PDF:")
-                        st.write(filtered_content)
+                        st.text_area("Summary", filtered_content, height=200, disabled=True)
                     else:
                         st.warning(f"No relevant content found for the query: {search_query}")
                 except Exception as e:
