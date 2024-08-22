@@ -70,14 +70,9 @@ st.header("Input Sections")
 
 
 
-st.subheader("YouTube Video URLs")
-video_urls = st.text_area("Enter YouTube Video URLs (one per line)", placeholder="e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ", height=200)
 
-st.subheader("Website URLs")
-website_urls = st.text_area("Enter Website URLs (one per line)", placeholder="e.g., https://www.example.com", height=200)
 
-st.subheader("Upload PDFs")
-uploaded_files = st.file_uploader("Choose PDF files", type="pdf", accept_multiple_files=True)
+
 
 
 # Helper function to fetch and parse website content
@@ -128,7 +123,27 @@ def get_pdf_text(pdf_docs):
     return text        
 
 
-# Button to trigger summarization
+content_type = st.selectbox("Select Content Type to Summarize", ("YouTube Videos", "Websites", "PDF Files"))
+
+if content_type == "YouTube Videos":
+    st.subheader("YouTube Video URLs")
+    video_urls = st.text_area("Enter YouTube Video URLs (one per line)", placeholder="e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ", height=200)
+
+elif content_type == "Websites":
+    st.subheader("Website URLs")
+    website_urls = st.text_area("Enter Website URLs (one per line)", placeholder="e.g., https://www.example.com", height=200)
+
+
+# File uploaders if PDFs or Text Files are selected
+elif content_type == "PDF Files":
+    st.subheader("Upload PDFs")
+    uploaded_files = st.file_uploader("Choose PDF files", type="pdf", accept_multiple_files=True)
+# elif content_type == "Text Files":
+#     text_files = st.file_uploader("Upload Text files", type=["txt"], accept_multiple_files=True)
+
+
+
+# Step 2: Define the summarization functionality when the button is clicked
 if st.button("Summarize Content", key="summarize"):
     # Validate Groq API Key
     if not groq_api_key.strip():
@@ -137,55 +152,63 @@ if st.button("Summarize Content", key="summarize"):
 
     combined_documents = []
 
-    # Summarize YouTube Videos
-    if video_urls.strip():
-        video_urls_list = [url.strip() for url in video_urls.split("\n") if validators.url(url) and "youtube.com" in url]
-        for url in video_urls_list:
-            try:
-                loader = YoutubeLoader.from_youtube_url(url, add_video_info=True)
-                docs = loader.load()
-                content = "\n".join([doc.page_content for doc in docs])
-                filtered_content = filter_content(content, search_query)
-                cleaned_docs = [Document(page_content=clean_text(doc.page_content)) for doc in docs]
-                combined_documents.extend(cleaned_docs)
-                if filtered_content:
-                    summary = summarize_text(filtered_content)
-                    st.success(f"Summary of {url}:")
-                    st.write(filtered_content)
-                else:
-                    st.warning(f"No relevant content found in {url} for the query: {search_query}")
-            except Exception as e:
-                st.error(f"An error occurred with {url}: {e}")
-
-
-                
-    # Summarize Websites
-    if website_urls.strip():
-        website_urls_list = [url.strip() for url in website_urls.split("\n") if validators.url(url)]
-        for url in website_urls_list:
-            content = fetch_website_content(url)
-            if content:
-                filtered_content = filter_content(content, search_query)
-                cleaned_content = clean_text(content)
-                combined_documents.append(Document(page_content=cleaned_content))
-                if filtered_content:
-                    doc = Document(page_content=filtered_content)
-                    chain = load_summarize_chain(llm, chain_type="stuff", prompt=prompt)
-                    summary = chain.run([doc])
-                    st.success(f"Summary of {url}:")
-                    st.write(summary)
-                else:
-                    st.warning(f"No relevant content found on {url} for the query: {search_query}")
+    if content_type == "YouTube Videos":
         
-    if uploaded_files: 
-      for uploaded_file in uploaded_files:
-       raw_text=get_pdf_text([uploaded_file])
-      filtered_content = filter_content(raw_text,search_query)
-      if filtered_content:
-            st.success(f"Summary of pdf:")
-            st.write(filtered_content)
-      else:
-            st.warning(f"No relevant content found for the query: {search_query}")
-    
+        # Summarize YouTube Videos
+        if video_urls.strip():
+            video_urls_list = [url.strip() for url in video_urls.split("\n") if validators.url(url) and "youtube.com" in url]
+            for url in video_urls_list:
+                try:
+                    loader = YoutubeLoader.from_youtube_url(url, add_video_info=True)
+                    docs = loader.load()
+                    content = "\n".join([doc.page_content for doc in docs])
+                    filtered_content = filter_content(content, search_query)
+                    cleaned_docs = [Document(page_content=clean_text(doc.page_content)) for doc in docs]
+                    combined_documents.extend(cleaned_docs)
+                    if filtered_content:
+                        summary = summarize_text(filtered_content)
+                        st.success(f"Summary of {url}:")
+                        st.write(summary)
+                    else:
+                        st.warning(f"No relevant content found in {url} for the query: {search_query}")
+                except Exception as e:
+                    st.error(f"An error occurred with {url}: {e}")
 
+    elif content_type == "Websites":
+        
+        # Summarize Websites
+        if website_urls.strip():
+            website_urls_list = [url.strip() for url in website_urls.split("\n") if validators.url(url)]
+            for url in website_urls_list:
+                try:
+                    content = fetch_website_content(url)
+                    if content:
+                        filtered_content = filter_content(content, search_query)
+                        cleaned_content = clean_text(content)
+                        combined_documents.append(Document(page_content=cleaned_content))
+                        if filtered_content:
+                            doc = Document(page_content=filtered_content)
+                            chain = load_summarize_chain(llm, chain_type="stuff", prompt=prompt)
+                            summary = chain.run([doc])
+                            st.success(f"Summary of {url}:")
+                            st.write(summary)
+                        else:
+                            st.warning(f"No relevant content found on {url} for the query: {search_query}")
+                except Exception as e:
+                    st.error(f"An error occurred with {url}: {e}")
 
+    elif content_type == "PDF Files":
+        
+        # Summarize PDF Files
+        if uploaded_files:
+            for uploaded_file in uploaded_files:
+                try:
+                    raw_text = get_pdf_text(uploaded_file)
+                    filtered_content = filter_content(raw_text, search_query)
+                    if filtered_content:
+                        st.success(f"Summary of PDF:")
+                        st.write(filtered_content)
+                    else:
+                        st.warning(f"No relevant content found for the query: {search_query}")
+                except Exception as e:
+                    st.error(f"An error occurred with the PDF: {e}")
