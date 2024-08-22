@@ -1,0 +1,12 @@
+streamlit
+langchain
+langchain_groq
+langchain_community
+bs4
+validators
+youtube-transcript-api
+pytube
+pypdf
+pymupdf
+pdfplumber
+requests
