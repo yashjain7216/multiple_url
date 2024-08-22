@@ -203,7 +203,7 @@ if st.button("Summarize Content", key="summarize"):
         if uploaded_files:
             for uploaded_file in uploaded_files:
                 try:
-                    raw_text = get_pdf_text(uploaded_file)
+                    raw_text = get_pdf_text([uploaded_file])
                     filtered_content = filter_content(raw_text, search_query)
                     if filtered_content:
                         st.success(f"Summary of PDF:")
