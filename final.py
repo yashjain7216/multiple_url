@@ -21,6 +21,23 @@ st.markdown("""
     .sidebar .sidebar-content {
         background-color: #f0f2f6;
     }
+    @keyframes slide-in {
+        from {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    .slide-in-text {
+        animation: slide-in 1s ease-out;
+        font-size: 24px;
+        color: #333333;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
     .css-1v3fvcr { 
         background-color: #f0f2f6;
     }
@@ -45,14 +62,14 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Page title with styling
-st.title("Document & Web Summarizer")
-st.markdown("Welcome to the Document & Web Summarizer! Enter your YouTube video URLs, website URLs, or upload PDF files to get concise summaries.")
+st.title("Summarizer")
+st.markdown('<div class="slide-in-text">Hi, how can I help you to summarize data?</div>', unsafe_allow_html=True)
 
 # Sidebar for Groq API Key and Search Query
 
 
-st.subheader("Search Query")
-search_query = st.text_input("Enter the topic or keyword to search for", placeholder="e.g., machine learning")
+st.subheader("Topic or Title")
+search_query = st.text_input("Enter the topic or keyword to search for", placeholder="Type here")
 
 # Gemma Model Using Groq API
 groq_api_key = os.getenv("GROQ_API_KEY")
@@ -127,11 +144,11 @@ content_type = st.selectbox("Select Content Type to Summarize", ("YouTube Videos
 
 if content_type == "YouTube Videos":
     st.subheader("YouTube Video URLs")
-    video_urls = st.text_area("Enter YouTube Video URLs (one per line)", placeholder="e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ", height=200)
+    video_urls = st.text_area("Enter YouTube Video URLs (one per line)", placeholder="Enter urls", height=200)
 
 elif content_type == "Websites":
     st.subheader("Website URLs")
-    website_urls = st.text_area("Enter Website URLs (one per line)", placeholder="e.g., https://www.example.com", height=200)
+    website_urls = st.text_area("Enter Website URLs (one per line)", placeholder="Enter websites url", height=200)
 
 
 # File uploaders if PDFs or Text Files are selected
@@ -163,8 +180,6 @@ if st.button("Summarize Content", key="summarize"):
                     docs = loader.load()
                     content = "\n".join([doc.page_content for doc in docs])
                     filtered_content = filter_content(content, search_query)
-                    cleaned_docs = [Document(page_content=clean_text(doc.page_content)) for doc in docs]
-                    combined_documents.extend(cleaned_docs)
                     if filtered_content:
                         doc = Document(filtered_content)
                         chain = load_summarize_chain(llm, chain_type="stuff", prompt=prompt)
