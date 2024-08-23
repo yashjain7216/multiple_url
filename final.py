@@ -34,7 +34,7 @@ st.markdown("""
     .slide-in-text {
         animation: slide-in 1s ease-out;
         font-size: 24px;
-        color: #333333;
+        color: white;
         font-weight: bold;
         margin-bottom: 20px;
     }
