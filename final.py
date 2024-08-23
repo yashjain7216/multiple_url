@@ -166,7 +166,9 @@ if st.button("Summarize Content", key="summarize"):
                     cleaned_docs = [Document(page_content=clean_text(doc.page_content)) for doc in docs]
                     combined_documents.extend(cleaned_docs)
                     if filtered_content:
-                        summary = summarize_text(filtered_content)
+                        doc = Document(filtered_content)
+                        chain = load_summarize_chain(llm, chain_type="stuff", prompt=prompt)
+                        summary = chain.run([doc])
                         st.success(f"Summary of {url}:")
                         st.text_area("Summary", summary, height=200, disabled=True)
                     else:
