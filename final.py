@@ -32,7 +32,7 @@ st.markdown("""
         }
     }
     .slide-in-text {
-        animation: slide-in 1s ease-out;
+        animation: slide-in 3s ease-out;
         font-size: 24px;
         color: white;
         font-weight: bold;
